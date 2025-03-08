@@ -24,15 +24,15 @@ class TodoRepository implements TodoInterface
         return $this->todo->findOrFail($id);
     }
 
-    public function create(array $data)
+    public function create($request)
     {
-        return $this->todo->create($data);
+        return $this->todo->create($request);
     }
 
-    public function update($id, array $data)
+    public function update($request, $id)
     {
-        $todo = $this->find($id);
-        $todo->update($data);
+        $todo = $this->todo->find($id);
+        $todo->update($request);
         return $todo;
     }
 

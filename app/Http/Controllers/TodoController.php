@@ -2,24 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Interfaces\TodoInterface;
+use App\Http\Requests\TodoFormRequest;
+use App\Services\TodoService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\Request;
 
 class TodoController extends Controller
 {
-    public $todoInterface;
-    public function __construct(TodoInterface $todoInterface)
+    public $todoService;
+
+    public function __construct(TodoService $todoService)
     {
-        $this->todoInterface = $todoInterface;
+        $this->todoService = $todoService;
     }
     /**
      * Display a listing of the resource.
      */
     public function index(): View
     {
-        $this->todoInterface->all();
-        return view('todos.index');
+        $todos = $this->todoService->all();
+        return view('todos.index', compact('todos'));
     }
 
     /**
@@ -27,15 +28,20 @@ class TodoController extends Controller
      */
     public function create()
     {
-        //
+        return view('todos.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TodoFormRequest $request)
     {
-        //
+        $result = $this->todoService->create($request);
+        if ($result) {
+            return back()->with('success', 'Todo has been created.');
+        } else {
+            return back()->with('error', 'Unable to create todo.');
+        }
     }
 
     /**
@@ -43,7 +49,8 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $todo = $this->todoService->find($id);
+        return view('todos.show', compact('todo'));
     }
 
     /**
@@ -51,15 +58,22 @@ class TodoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $todos = $this->todoService->all();
+        $todo = $this->todoService->find($id);
+        return view('todos.index', compact('todos','todo'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(TodoFormRequest $request, string $id)
     {
-        //
+        $result = $this->todoService->update($request, $id);
+        if ($result) {
+            return back()->with('success', 'Todo has been updated.');
+        } else {
+            return back()->with('error', 'Unable to update todo.');
+        }
     }
 
     /**
@@ -67,6 +81,7 @@ class TodoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $this->todoService->delete($id);
+        return back()->with('success', 'Todo has been deleted.');
     }
 }
